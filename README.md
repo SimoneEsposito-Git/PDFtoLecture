@@ -44,4 +44,4 @@ The workflow includes:
    uv venv .venv -p 3.12
    source .venv/bin/activate
    uv pip install -U requirements.txt
-   uv run -m scripts.main input/example.pdf --output output/ --visuals visuals```
+   uv run -m scripts.main input/example.pdf --output output/ --visuals visuals
