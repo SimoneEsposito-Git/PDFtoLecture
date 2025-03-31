@@ -1,0 +1,6 @@
+models/
+legacy/
+.DS_Store
+__pycache__/
+input/*
+output/*

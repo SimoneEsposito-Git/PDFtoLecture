@@ -1,0 +1,28 @@
+# Core dependencies
+PyMuPDF>=1.22.5          # For PDF text and image extraction
+PyPDF2>=3.0.0            # For additional PDF processing (if needed)
+Pillow>=9.5.0            # For image handling (e.g., visuals in JSON)
+
+# TTS dependencies
+kokoro-onnx>=0.4.0       # For Kokoro ONNX-based text-to-speech
+onnxruntime>=1.15.0      # For ONNX Runtime session management
+soundfile>=0.13.1        # For saving audio files
+
+# LLM dependencies
+google-genai>=0.1.0      # For interacting with Google GenAI
+
+# Utilities
+tqdm>=4.66.2             # For progress bars
+pathlib>=1.0.1           # For path management
+ffmpeg-python>=0.2.0     # For audio processing (optional, fallback for pydub)
+
+# Optional dependencies
+pydub>=0.25.1            # For audio merging (if available)
+misaki[en]>=0.7.4        # For phoneme generation (if needed)
+
+# Logging
+concurrent-log-handler>=0.9.25  # For advanced logging
+
+# Development dependencies (optional)
+pytest>=7.4.0            # For testing
+black>=23.9.1            # For code formatting
