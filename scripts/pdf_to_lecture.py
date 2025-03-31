@@ -64,7 +64,7 @@ def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False
     
     # Run TTS on the markdown file
     tts(
-        input_path=markdown_text.splitlines(),
+        input_path=str(md_path),
         output_path=str(mp3_path),
         debug=debug
     )
