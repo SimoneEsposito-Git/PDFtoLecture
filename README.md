@@ -23,11 +23,24 @@ The workflow includes:
 ## Installation
 
 ### Prerequisites
-- Python 3.10 or higher
+- Python 3.10 
 - `ffmpeg` installed and available in your system's PATH (required for audio processing).
 
-### Install Dependencies
+### Instructions
 1. Clone the repository:
    ```bash
    git clone https://github.com/your-repo/pdf-to-lecture.git
    cd pdf-to-lecture
+
+2. Download the TTS models
+    https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+    https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+   and save them to a folder models/
+
+3. Install uv from https://docs.astral.sh/uv/getting-started/installation
+
+4. Run
+   ```uv venv --seed -p 3.12
+   source .venv/bin/activate
+   uv pip install -U requirements.txt
+   uv run -m scripts.main input/example.pdf --output output/ --visuals visuals```
