@@ -4,7 +4,7 @@ from .file_utils import (
     get_file_extension,
     list_files_in_directory,
 )
-from .logging_utils import configure_logging
+from .logging_utils import configure_logging, ProcessingAnimation
 
 __all__ = [
     "ensure_directory_exists",

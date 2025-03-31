@@ -4,7 +4,7 @@ import numpy as np
 from kokoro_onnx import Kokoro
 from tts.session import create_session
 
-def tts(input_path, output_path, voice="af_sarah", speed=1.0, lang="en-us", debug=False):
+def tts(text, output_path, voice="af_sarah", speed=1.0, lang="en-us", debug=False):
     """
     Convert text from input_path to speech saved at output_path.
 
@@ -24,18 +24,11 @@ def tts(input_path, output_path, voice="af_sarah", speed=1.0, lang="en-us", debu
     logging.getLogger("kokoro_onnx").setLevel(log_level)
 
     if debug:
-        print(f"Processing text from {input_path} to audio at {output_path}")
+        print(f"Processing text from to audio at {output_path}")
 
     # Initialize session once and reuse
     session = create_session()
     kokoro = Kokoro.from_session(session, "models/voices-v1.0.bin")
-
-    # Read text file
-    with open(input_path, "r", encoding="utf-8") as file:
-        text = file.read()
-
-    if debug:
-        print(f"Read {len(text)} characters from {input_path}")
 
     # Generate speech
     samples, sample_rate = kokoro.create(
@@ -53,7 +46,7 @@ def tts(input_path, output_path, voice="af_sarah", speed=1.0, lang="en-us", debu
 
     return samples, sample_rate
 
-def tts_with_timestamps(input_text, output_audio_path, voice="af_sarah", speed=1.0, lang="en-us", debug=False):
+def tts_with_timestamps(text, output_path, voice="af_sarah", speed=1.0, lang="en-us", debug=False):
     """
     Convert slide-based text to a single audio file with timestamps for each slide.
 
@@ -75,8 +68,8 @@ def tts_with_timestamps(input_text, output_audio_path, voice="af_sarah", speed=1
     logging.getLogger("kokoro_onnx").setLevel(log_level)
 
     if debug:
-        print(f"Generating audio at {output_audio_path}")
-
+        print(f"Generating audio at {output_path}")
+        
     # Initialize session and Kokoro model
     session = create_session()
     kokoro = Kokoro.from_session(session, "models/voices-v1.0.bin")
@@ -88,7 +81,7 @@ def tts_with_timestamps(input_text, output_audio_path, voice="af_sarah", speed=1
     current_time = 0.0  # Track the cumulative time in seconds
 
     # Process each slide
-    for slide_data in input_text:
+    for slide_data in text.split("\n"):
         slide_number = slide_data["slide"]
         slide_text = slide_data["text"]
 
@@ -114,9 +107,78 @@ def tts_with_timestamps(input_text, output_audio_path, voice="af_sarah", speed=1
 
     # Save the combined audio to the output file
     all_samples = np.array(all_samples, dtype=np.float32)
-    sf.write(output_audio_path, all_samples, sample_rate)
+    sf.write(output_path, all_samples, sample_rate)
 
     if debug:
-        print(f"Audio saved at {output_audio_path}")
+        print(f"Audio saved at {output_path}")
 
     return timestamps
+
+import concurrent.futures
+from pathlib import Path
+from tqdm import tqdm
+
+def tts_parallel(text, output_path, voice="af_sarah", speed=1.0, lang="en-us", debug=False):
+    """
+    Convert slide-based text to audio files in parallel.
+
+    Args:
+        text (str): Text content separated by newlines, each line representing a slide
+        output_path (str): Base path for output files
+        voice (str): Voice to use for TTS.
+        speed (float): Speed of the speech.
+        lang (str): Language of the text.
+        debug (bool): Whether to print debug information.
+
+    Returns:
+        list: A list of file paths to the generated audio files.
+    """
+    output_dir = Path(output_path).parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Parse the slides from text and assign numbers
+    slides = []
+    for i, line in enumerate(text.split('\n')):
+        if line.strip():
+            slides.append({
+                "slide": i+1,  # Start slide numbering from 1
+                "text": line.strip()
+            })
+
+    def process_slide(slide_data):
+        slide_number = slide_data["slide"]
+        slide_text = slide_data["text"]
+        slide_output_path = output_dir / f"slide_{slide_number}.wav"
+
+        if debug:
+            print(f"Processing Slide {slide_number}: {len(slide_text)} characters")
+
+        # Generate audio for the slide
+        _, _ = tts(
+            slide_text, 
+            str(slide_output_path),
+            voice=voice, 
+            speed=speed, 
+            lang=lang, 
+            debug=debug
+        )
+
+        return slide_output_path
+
+    # Use ThreadPoolExecutor or ProcessPoolExecutor for parallel processing
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Create list of futures
+        futures = [executor.submit(process_slide, slide) for slide in slides]
+        
+        # Setup progress bar
+        audio_files = []
+        total = len(futures)
+        
+        # Process futures with progress bar
+        for future in tqdm(concurrent.futures.as_completed(futures), 
+                          total=total, 
+                          desc="Converting text to speech",
+                          unit="slide"):
+            audio_files.append(future.result())
+
+    return audio_files

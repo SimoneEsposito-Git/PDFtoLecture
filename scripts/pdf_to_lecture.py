@@ -1,7 +1,10 @@
+import time
+import threading
 from pathlib import Path
 from pdf_processing.parsing import create_json_from_pdf
 from lecture_generation.llm_client import LLMClient
-from tts.kokoro import tts, tts_with_timestamps
+from tts.kokoro import tts, tts_with_timestamps, tts_parallel
+from utils.logging_utils import ProcessingAnimation
 
 def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False):
     """
@@ -37,11 +40,11 @@ def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False
     
     # Step 1: Convert PDF to JSON
     json_path = output_dir / f"{base_name}.json"
-    print(f"Converting PDF to JSON: {json_path}")
-    json_data = create_json_from_pdf(
-        pdf_path=str(pdf_path),
-        visuals_folder=str(visuals_path)
-    )
+    with ProcessingAnimation(f"Converting PDF to JSON: {json_path}"):
+        json_data = create_json_from_pdf(
+            pdf_path=str(pdf_path),
+            visuals_folder=str(visuals_path)
+        )
     
     # Save JSON data to file
     with open(json_path, "w", encoding="utf-8") as json_file:
@@ -50,9 +53,9 @@ def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False
     
     # Step 2: Generate lecture markdown from JSON
     md_path = output_dir / f"{base_name}.md"
-    print(f"Generating lecture markdown: {md_path}")
-    llm_client = LLMClient(api_key="AIzaSyD-fDcgWt9-U6MEb8VfP6L6Jn3YoHPa-lw")
-    markdown_text = llm_client.generate_lecture(str(json_path), 'gemini-2.0-flash')
+    with ProcessingAnimation(f"Generating lecture markdown: {md_path}"):
+        llm_client = LLMClient(api_key="AIzaSyD-fDcgWt9-U6MEb8VfP6L6Jn3YoHPa-lw")
+        markdown_text = llm_client.generate_lecture(str(json_path), 'gemini-2.0-flash')
     
     # Save markdown to file
     with open(md_path, 'w', encoding='utf-8') as md_file:
@@ -60,13 +63,12 @@ def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False
     
     # Step 3: Convert markdown to audio using TTS
     mp3_path = output_dir / f"{base_name}.mp3"
-    print(f"Converting lecture to audio: {mp3_path}")
-    
-    # Run TTS on the markdown file
-    tts(
-        input_path=str(md_path),
-        output_path=str(mp3_path),
-        debug=debug
-    )
+    with ProcessingAnimation(f"Converting lecture to audio: {mp3_path}"):
+        # Run TTS on the markdown file
+        tts_parallel(
+            text=markdown_text,
+            output_path=str(mp3_path),
+            debug=debug
+        )
     
     return json_path, md_path, mp3_path
