@@ -40,7 +40,8 @@ The workflow includes:
 3. Install uv from https://docs.astral.sh/uv/getting-started/installation
 
 4. Run
-   ```uv venv --seed -p 3.12
+   ```
+   uv venv .venv -p 3.12
    source .venv/bin/activate
    uv pip install -U requirements.txt
    uv run -m scripts.main input/example.pdf --output output/ --visuals visuals```
