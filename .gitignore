@@ -3,4 +3,5 @@ legacy/
 .DS_Store
 __pycache__/
 input/*
+!input/example.pdf
 output/*

@@ -63,9 +63,9 @@ def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False
     print(f"Converting lecture to audio: {mp3_path}")
     
     # Run TTS on the markdown file
-    tts_with_timestamps(
-        input_text=markdown_text.splitlines(),
-        output_audio_path=str(mp3_path),
+    tts(
+        input_path=markdown_text.splitlines(),
+        output_path=str(mp3_path),
         debug=debug
     )
     
