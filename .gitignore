@@ -5,3 +5,4 @@ __pycache__/
 input/*
 !input/example.pdf
 output/*
+tts_experiment.py

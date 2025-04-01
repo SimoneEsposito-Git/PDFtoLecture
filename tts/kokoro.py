@@ -133,6 +133,10 @@ def tts_parallel(text, output_path, voice="af_sarah", speed=1.0, lang="en-us", d
     Returns:
         list: A list of file paths to the generated audio files.
     """
+    # Set logging level based on debug flag
+    log_level = logging.DEBUG if debug else logging.WARNING
+    logging.getLogger("kokoro_onnx").setLevel(log_level)
+    
     output_dir = Path(output_path).parent
     output_dir.mkdir(parents=True, exist_ok=True)
     
@@ -148,7 +152,7 @@ def tts_parallel(text, output_path, voice="af_sarah", speed=1.0, lang="en-us", d
     def process_slide(slide_data):
         slide_number = slide_data["slide"]
         slide_text = slide_data["text"]
-        slide_output_path = output_dir / f"slide_{slide_number}.wav"
+        slide_output_path = output_dir / f"slide_{slide_number}.mp3"
 
         if debug:
             print(f"Processing Slide {slide_number}: {len(slide_text)} characters")

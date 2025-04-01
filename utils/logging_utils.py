@@ -8,6 +8,7 @@ class ProcessingAnimation:
         self.animation_chars = ['|', '/', '-', '\\']
         self.running = False
         self.thread = None
+        self.start_time = None
         
     def animate(self):
         i = 0
@@ -18,6 +19,7 @@ class ProcessingAnimation:
             
     def __enter__(self):
         self.running = True
+        self.start_time = time.time()
         self.thread = threading.Thread(target=self.animate)
         self.thread.daemon = True
         self.thread.start()
@@ -25,9 +27,10 @@ class ProcessingAnimation:
         
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.running = False
+        elapsed_time = time.time() - self.start_time
         if self.thread:
             self.thread.join(0.2)
-        print(f"\r{self.description} ✓")
+        print(f"\r{self.description} ✓ (took {elapsed_time:.2f}s)")
 
 def configure_logging(log_file_path=None, log_level=logging.INFO):
     """
