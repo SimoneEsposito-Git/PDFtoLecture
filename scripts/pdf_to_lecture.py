@@ -4,6 +4,7 @@ from pathlib import Path
 from pdf_processing.parsing import create_json_from_pdf
 from lecture_generation.llm_client import LLMClient
 from tts.kokoro import tts, tts_with_timestamps, tts_parallel
+from tts import get_tts_engine
 from utils.logging_utils import ProcessingAnimation
 
 INSTRUCTIONS = """
@@ -16,7 +17,7 @@ INSTRUCTIONS = """
     potentially enclosed in brackets or described narratively**.\n\n**Output Requirements:**\n
     1.  **Persona:** Maintain a professional, **pedagogical, explanatory,** and clear \"university professor\" tone throughout the entire transcript. 
         Adopt a tone that aims to **teach and clarify**, not just present information.\n
-    2.  **Content Coverage:** For each **slide identified by the 'Slide [number]:' pattern** in the input:\n    
+    2.  **Content Coverage:** For each **slide** in the input:\n    
         *   Incorporate ALL text elements associated with that slide into your spoken narrative. 
             **Ensure no text point is omitted.** Present the text in a logical order suitable for a lecture.\n    
         *   If descriptions of images, graphs, diagrams, or other visuals are provided for a slide, seamlessly integrate these descriptions into your spoken text. 
@@ -43,13 +44,13 @@ INSTRUCTIONS = """
 PROMPT = """
     Please act as a university professor and transform the following lecture slide content into a single, continuous spoken lecture transcript, following the system instructions precisely.\n\n
     **Key requirements:**\n*   
-        Cover ALL text from each slide, identified by the 'Slide [number]:' pattern.\n
+        Cover ALL text from each slide\n
         *   **Explain concepts thoroughly**, providing context and motivation.\n
         *   Naturally integrate descriptions of any relevant visuals mentioned (potentially in brackets or described) while ignoring irrelevant visuals such as logos and stock images.\n
         *   Maintain a consistent **pedagogical professor persona** and speaking style.\n
         *   Separate the transcript for each slide's content using exactly one newline character (\\n).\n
-        *   Generate the output in the {language} language, matching the input slides.\n
-        *   Do not use bullet points or speaker tags.\n\n**Slide Content:**\n\n{slide_data}"""
+        *   Generate the output in the correct language, matching the input slides.\n
+        *   Do not use bullet points or speaker tags.\n\n**Slide Content:**\n\n"""
 
 def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False):
     """
@@ -109,13 +110,19 @@ def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False
         md_file.write(markdown_text)
     
     # Step 3: Convert markdown to audio using TTS
+    tts = get_tts_engine("openai")
     mp3_path = output_dir / f"{base_name}.mp3"
     with ProcessingAnimation(f"Converting lecture to audio: {mp3_path}"):
         # Run TTS on the markdown file
-        tts(
+        # tts(
+        #     text=markdown_text,
+        #     output_path=str(mp3_path),
+        #     debug=debug
+        # )
+        tts.synthesize(
             text=markdown_text,
             output_path=str(mp3_path),
-            debug=debug
+            voice="alloy"
         )
     
     return json_path, md_path, mp3_path

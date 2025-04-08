@@ -3,7 +3,57 @@ import logging
 import numpy as np
 from kokoro_onnx import Kokoro
 from tts.session import create_session
+from tts.base import TTS
 
+class KokoroTTS(TTS):
+    def __init__(self, **kwargs):
+        """
+        Initialize the Kokoro TTS engine with optional parameters.
+
+        Args:
+            **kwargs: Optional parameters for TTS initialization.
+        """
+        super().__init__(**kwargs)
+        self.session = create_session()
+        self.kokoro = Kokoro.from_session(self.session, "models/voices-v1.0.bin")
+        if not self.kokoro:
+            raise ValueError("Failed to initialize Kokoro TTS engine.")
+        if kwargs.get("debug", False):
+            print("Kokoro TTS engine initialized successfully.")
+        self.debug = kwargs.get("debug", False)
+        logging.getLogger("kokoro_onnx").setLevel(logging.DEBUG if self.debug else logging.WARNING)
+        
+    def synthesize(self, text, output_path, voice="af_sarah", speed=1.0, lang="en-us", debug=False):
+        """
+        Convert text to speech and save it to the output path.
+
+        Args:
+            text (str): The text to convert.
+            output_path (str): Path to save the audio file.
+            voice (str): Voice to use for TTS.
+            speed (float): Speed of the speech.
+            lang (str): Language of the text.
+            debug (bool): Whether to print debug information.
+
+        Returns:
+            tuple: (samples, sample_rate) of the generated audio.
+        """
+        # Generate speech
+        samples, sample_rate = self.kokoro.create(
+            text, voice=voice, speed=speed, lang=lang
+        )
+
+        # Use float32 explicitly for better performance
+        samples = np.array(samples, dtype=np.float32)
+
+        # Write output
+        sf.write(output_path, samples, sample_rate)
+
+        if debug:
+            print(f"Created audio at {output_path}")
+
+        return samples, sample_rate
+    
 def tts(text, output_path, voice="af_sarah", speed=1.0, lang="en-us", debug=False):
     """
     Convert text from input_path to speech saved at output_path.
