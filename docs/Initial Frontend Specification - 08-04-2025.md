@@ -161,3 +161,65 @@ Students, educators, or anyone wishing to review lecture material in a more enga
         *   `document.pdf` (Optional): Embed the original PDF for portability.
 *   **Timestamp Data:** List of dictionaries: `[{'page': int, 'start_time': float, 'end_time': float}, ...]`. Page numbers are 0-indexed. Times are in seconds.
 *   **Image Bounding Box Data:** Dictionary where keys are 0-indexed page numbers, and values are lists of dictionaries: `{ page_num: [{'bbox': [float, float, float, float]}, ...], ...}`. Bbox coordinates relate to the PDF page dimensions.
+
+---
+
+**Modification: Export As**
+
+**4. Functional Requirements**
+
+**4.1 File Handling & Lecture Management (Interactions with Backend Slots)**
+
+*   (4.1.1 - 4.1.5 remain the same as previous FE spec: Import PDF, Drag & Drop, Open, Save, Save As)
+*   **4.1.6 Export Lecture As (New):**
+    *   Provide a `QAction` in the `File` menu: "Export Lecture As...". Enable only when a lecture is loaded.
+    *   Action:
+        1.  Opens a `QFileDialog::getSaveFileName` dialog.
+        2.  Set appropriate name filters for supported export formats (e.g., "Video Files (*.mp4 *.mov);;Audio Files (*.mp3 *.wav)").
+        3.  Retrieve the chosen filename/path and the selected filter (which determines the format).
+        4.  Gather necessary data about the currently loaded lecture (e.g., paths to PDF, audio, timestamp data stored in the main window/controller).
+        5.  Call the Backend `ExportWorker`'s `start_export` slot, passing the lecture data, selected format string (e.g., 'mp4', 'mp3'), and output path.
+        6.  Initiate progress display (See 4.6).
+
+**4.2 Lecture Generation Process (Responding to Backend Signals)**
+
+*(Remains the same as previous FE spec - Handles `progress_update`, `page_ready`, `generation_complete`, `error_occurred` signals from `GenerationWorker`)*
+
+**4.3 Lecture Playback Interface**
+
+*(Remains the same as previous FE spec - Handles PDF display, seek bar, playback controls, sync, fullscreen, slide navigator, interactive graphics)*
+
+**4.4 LLM Chat Interface**
+
+*(Remains the same as previous FE spec - Handles chat UI, interaction, context management, signals from `ChatWorker`)*
+
+**4.5 Menu Bar & Settings**
+
+*   **4.5.1 Menu Structure:**
+    *   `File`: Import PDF, Open Lecture, Save, Save Lecture As..., **Export Lecture As... (New)**, Exit
+    *   (Other menus Edit, View, Settings, Help remain the same)
+*   **4.5.2 Settings Dialog:** *(Remains the same as previous FE spec)*
+
+**4.6 Lecture Export Process (FE Perspective - New Section)**
+
+*   **4.6.1 Triggering:** Initiated by user action (4.1.6) calling the Backend `ExportWorker`'s `start_export` slot.
+*   **4.6.2 Progress Handling:** Implement slots connected to the `ExportWorker`'s signals:
+    *   **`on_export_progress(percentage: int)`:** Updates a progress indicator dedicated to the export process (e.g., a `QProgressDialog` shown modally or updates in the `QStatusBar`). Display percentage. Disable relevant UI (Export menu item, potentially main controls).
+    *   **`on_export_complete(result_dict: dict)`:** Handles export completion.
+        *   If `result_dict['success']` is True: Show a success message (e.g., `QMessageBox::information` or status bar update like "Export successful: [output_path]"). Close the progress indicator. Re-enable UI.
+        *   If `result_dict['success']` is False: Show an error message using `QMessageBox::warning` with `result_dict['error_message']`. Close the progress indicator. Re-enable UI.
+*   **4.6.3 Cancellation:** (Optional) If the Backend `ExportWorker` supports cancellation, provide a "Cancel" button on the progress indicator that calls the corresponding worker slot.
+
+**5. Backend Communication**
+
+*   The Frontend instantiates Backend worker objects (`GenerationWorker`, `ChatWorker`, **`ExportWorker`**) and moves them to separate `QThread`s.
+*   Connections are established between Frontend widget signals (e.g., `QAction::triggered`) and worker slots (`@pyqtSlot`).
+*   Connections are established between worker signals (`pyqtSignal` like `generation_complete`, `response_ready`, **`export_complete`**) and Frontend slots (`@pyqtSlot`) for receiving results and errors.
+
+**6. Data Formats**
+
+*(No changes needed from previous FE spec regarding how data is received/handled via signals)*
+
+---
+
+Generated with Google Gemini 2.5 Pro
