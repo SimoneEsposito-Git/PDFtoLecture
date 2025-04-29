@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class TTS(ABC):
+class BaseTTS(ABC):
     @abstractmethod
     def __init__(self, **kwargs):
         """

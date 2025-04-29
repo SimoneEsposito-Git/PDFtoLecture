@@ -3,9 +3,9 @@ import logging
 import numpy as np
 from kokoro_onnx import Kokoro
 from tts.session import create_session
-from tts.base import TTS
+from tts.base import BaseTTS
 
-class KokoroTTS(TTS):
+class KokoroTTS(BaseTTS):
     def __init__(self, **kwargs):
         """
         Initialize the Kokoro TTS engine with optional parameters.

@@ -1,12 +1,12 @@
 from .session import create_session
 from .kokoro import tts, KokoroTTS
 from .openai import OpenAITTS
-from .base import TTS
+from .base import BaseTTS
 
 __all__ = [
-    "create_session",
-    "tts",
-    "TTS"
+    "OpenAITTS",
+    "KokoroTTS",
+    "BaseTTS"
 ]
 
 TTS_REGISTRY = {

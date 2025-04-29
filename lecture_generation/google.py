@@ -1,12 +1,12 @@
 from google import genai
 from google.genai import types
-from lecture_generation.json_to_markdown import json_to_content
+from lecture_generation.base_llm_client import BaseLLMClient
 
-class LLMClient:
+class GoogleLLMClient(BaseLLMClient):
     """
     A wrapper for interacting with the LLM (e.g., Google GenAI).
     """
-    def __init__(self, api_key):
+    def __init__(self, model, api_key):
         """
         Initialize the LLM client.
 
@@ -14,8 +14,9 @@ class LLMClient:
             api_key (str): API key for the LLM service.
         """
         self.client = genai.Client(api_key=api_key)
+        self.model = model
 
-    def generate_lecture(self, json_path, llm_model):
+    def process_text(self, prompt, instruction=None):
         """
         Generate lecture content using the LLM.
 
@@ -26,12 +27,11 @@ class LLMClient:
         Returns:
             str: The generated lecture content.
         """
-        content = json_to_content(json_path)
         response = self.client.models.generate_content(
-            model=llm_model,
-            contents=content[1:],  # Exclude the first item (instruction) from the content
+            model=self.model,
+            contents=prompt,  # Exclude the first item (instruction) from the content
             config=types.GenerateContentConfig(
-                system_instruction=content[0],  # Use the first item as the system instruction
+                system_instruction=instruction,  # Use the first item as the system instruction
             )
         )
         return response.text

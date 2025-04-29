@@ -1,7 +1,7 @@
 from openai import OpenAI
-from tts.base import TTS
+from tts.base import BaseTTS
 
-class OpenAITTS(TTS):
+class OpenAITTS(BaseTTS):
     def __init__(self, api_key=None, model="gpt-3.5-turbo", temperature=0.7):
         self.api_key = api_key
         self.model = model

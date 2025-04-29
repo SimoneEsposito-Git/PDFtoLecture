@@ -2,6 +2,7 @@
 PyMuPDF>=1.22.5          # For PDF text and image extraction
 PyPDF2>=3.0.0            # For additional PDF processing (if needed)
 Pillow>=9.5.0            # For image handling (e.g., visuals in JSON)
+langdetect>=1.0.9         # For language detection
 
 # TTS dependencies
 kokoro-onnx>=0.4.0       # For Kokoro ONNX-based text-to-speech

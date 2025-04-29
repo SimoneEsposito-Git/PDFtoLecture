@@ -1,6 +1,7 @@
 import fitz  # PyMuPDF
 import os
 from pathlib import Path
+from langdetect import detect
 # from pdf_processing.ocr import extract_text_from_pdf
 
 def extract_text_from_pdf(pdf_path):
@@ -66,19 +67,19 @@ def create_json_from_pdf(pdf_path, visuals_folder, instructions=None, prompt=Non
 
     Returns:
         list: A list of dictionaries containing text and visuals for each page.
+        string: The detected language of the text content.
     """
     # Extract text for all pages
     text_content_list = extract_text_from_pdf(pdf_path)
 
     # Extract images for all pages
     all_visuals = extract_images_from_pdf(pdf_path, visuals_folder)
-
+    
+    # Detect the language of the text content
+    language = detect(" ".join(text_content_list))
+    
     # Create results for all pages
     results = []
-    results.append({
-        "instructions": instructions,
-        "prompt": prompt
-    })
     for page_idx, text in enumerate(text_content_list):
         page_num = page_idx + 1
 
@@ -93,4 +94,4 @@ def create_json_from_pdf(pdf_path, visuals_folder, instructions=None, prompt=Non
         }
         results.append(page_data)
 
-    return results
+    return results, language
