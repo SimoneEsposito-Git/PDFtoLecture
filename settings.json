@@ -1,0 +1,36 @@
+{
+  "selected_llm": "openai_gpt3.5",
+  "selected_tts": "kokoro",
+  "general": {
+    "preferred_language": "en",
+    "always_sync_playback": false,
+    "theme": "system"
+  },
+  "llm_options": {
+    "openai_gpt3.5": {
+      "display_name": "OpenAI GPT-3.5 Turbo",
+      "api_key_env": "OPENAI_API_KEY",
+      "model_name": "gpt-3.5-turbo",
+      "max_tokens": 1500
+    },
+    "openai_gpt4o": {
+      "display_name": "OpenAI GPT-4o",
+      "api_key_env": "OPENAI_API_KEY",
+      "model_name": "gpt-4o",
+      "max_tokens": 2000
+    }
+  },
+  "tts_options": {
+    "openai": {
+      "display_name": "OpenAI TTS",
+      "api_key_env": "OPENAI_API_KEY",
+      "default_voice": "alloy",
+      "default_speed": 1.0,
+      "model": "tts-1"
+    },
+    "kokoro": {
+      "display_name": "Kokoro TTS (Local)",
+      "model_path": "models/kokoro-v1.0.onnx"
+    }
+  }
+}

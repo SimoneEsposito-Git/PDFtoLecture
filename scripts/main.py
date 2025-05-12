@@ -1,5 +1,5 @@
 import argparse
-from scripts.pdf_to_lecture import pdf_to_lecture
+from scripts.cli import cli
 
 def main():
     """
@@ -13,7 +13,7 @@ def main():
     
     args = parser.parse_args()
 
-    json_path, md_path, mp3_path = pdf_to_lecture(
+    json_path, md_path, mp3_path = cli(
         pdf_path=args.pdf_path,
         output_dir=args.output,
         visuals_dir=args.visuals,

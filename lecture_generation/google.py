@@ -16,7 +16,7 @@ class GoogleLLMClient(BaseLLMClient):
         self.client = genai.Client(api_key=api_key)
         self.model = model
 
-    def process_text(self, prompt, instruction=None):
+    def process_text(self, prompt, text, instruction=None):
         """
         Generate lecture content using the LLM.
 
@@ -29,7 +29,7 @@ class GoogleLLMClient(BaseLLMClient):
         """
         response = self.client.models.generate_content(
             model=self.model,
-            contents=prompt,  # Exclude the first item (instruction) from the content
+            contents=prompt + "\n\n" + text,  # Exclude the first item (instruction) from the content
             config=types.GenerateContentConfig(
                 system_instruction=instruction,  # Use the first item as the system instruction
             )

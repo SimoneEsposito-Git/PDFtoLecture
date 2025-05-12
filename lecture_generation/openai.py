@@ -5,7 +5,7 @@ class OpenAILLMClient:
         self.model = model
         self.client = OpenAI(api_key=api_key)
 
-    def process_text(self, prompt, instruction=None):
+    def process_text(self, prompt, text, instruction=None):
         """
         Generate lecture content using the LLM.
         Args:
@@ -15,8 +15,8 @@ class OpenAILLMClient:
             str: The generated lecture content.
         """
         response = self.client.responses.create(
-            model="gpt-4.1",
-            instructions="Talk like a pirate.",
-            input="Are semicolons optional in JavaScript?",
+            model=self.model,
+            instructions=instruction,
+            input=prompt + "\n\n" + text,
         )
         return response.output_text

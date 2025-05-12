@@ -1,10 +1,9 @@
 import time
 import threading
 from pathlib import Path
-from pdf_processing.parsing import create_json_from_pdf
-from lecture_generation.llm_client import LLMClient
-from tts.kokoro import tts, tts_with_timestamps, tts_parallel
-from tts import get_tts_engine
+from lecture_generation.ocr_and_parsing import create_json_from_pdf
+from lecture_generation.openai import OpenAILLMClient
+from tts.openai import OpenAITTS
 from utils.logging_utils import ProcessingAnimation
 
 INSTRUCTIONS = """
@@ -52,7 +51,7 @@ PROMPT = """
         *   Generate the output in the correct language, matching the input slides.\n
         *   Do not use bullet points or speaker tags.\n\n**Slide Content:**\n\n"""
 
-def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False):
+def cli(pdf_path, output_dir=None, visuals_dir="visuals", debug=False):
     """
     Convert a PDF file to a lecture with text (.md) and audio (.mp3).
     
@@ -89,9 +88,7 @@ def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False
     with ProcessingAnimation(f"Converting PDF to JSON: {json_path}"):
         json_data = create_json_from_pdf(
             pdf_path=str(pdf_path),
-            visuals_folder=str(visuals_path),
-            prompt=PROMPT,
-            instructions=INSTRUCTIONS
+            visuals_folder=str(visuals_path)
         )
     
     # Save JSON data to file
@@ -102,15 +99,16 @@ def pdf_to_lecture(pdf_path, output_dir=None, visuals_dir="visuals", debug=False
     # Step 2: Generate lecture markdown from JSON
     md_path = output_dir / f"{base_name}.md"
     with ProcessingAnimation(f"Generating lecture markdown: {md_path}"):
-        llm_client = LLMClient(api_key="AIzaSyD-fDcgWt9-U6MEb8VfP6L6Jn3YoHPa-lw")
-        markdown_text = llm_client.generate_lecture(str(json_path), 'gemini-2.0-flash')
+        llm_client = OpenAILLMClient(model = "gpt-4o", api_key="AIzaSyD-fDcgWt9-U6MEb8VfP6L6Jn3YoHPa-lw")
+        print(json_data[0][2]['text_content'])
+        markdown_text = llm_client.process_text(PROMPT, json_data, instruction=INSTRUCTIONS)
     
     # Save markdown to file
     with open(md_path, 'w', encoding='utf-8') as md_file:
         md_file.write(markdown_text)
-    
+        
     # Step 3: Convert markdown to audio using TTS
-    tts = get_tts_engine("openai")
+    tts = OpenAITTS(api_key="AIzaSyD-fDcgWt9-U6MEb8VfP6L6Jn3YoHPa-lw", model="gpt-4o-mini-tts", temperature=0.7)
     mp3_path = output_dir / f"{base_name}.mp3"
     with ProcessingAnimation(f"Converting lecture to audio: {mp3_path}"):
         # Run TTS on the markdown file

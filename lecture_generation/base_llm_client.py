@@ -6,7 +6,7 @@ class BaseLLMClient:
         self.model = model
         self.api_key = api_key
     
-    def process_text(self, prompt) -> str:
+    def process_text(self, prompt, text, instructions = None) -> str:
         """
         Generate lecture content using the LLM.
     

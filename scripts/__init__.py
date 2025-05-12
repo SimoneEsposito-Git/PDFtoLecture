@@ -1,5 +1,5 @@
-from .pdf_to_lecture import pdf_to_lecture
+from .cli import cli
 
 __all__ = [
-    "pdf_to_lecture",
+    "cli",
 ]

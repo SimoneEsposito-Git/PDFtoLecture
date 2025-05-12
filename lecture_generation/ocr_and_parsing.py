@@ -57,7 +57,7 @@ def extract_images_from_pdf(pdf_path, visuals_folder):
                 })
     return visuals
 
-def create_json_from_pdf(pdf_path, visuals_folder, instructions=None, prompt=None):
+def create_json_from_pdf(pdf_path, visuals_folder):
     """
     Extracts text and images from a PDF and creates a JSON-like structure.
 
